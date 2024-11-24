@@ -3,7 +3,6 @@ import re
 import pickle
 import google.generativeai as genai
 import nltk
-import PyPDF2 as pdf
 nltk.download('stopwords')
 import en_core_web_sm
 nlp = en_core_web_sm.load()
@@ -27,14 +26,6 @@ def get_gemini_response(input,text):
     model=genai.GenerativeModel('gemini-pro')
     response=model.generate_content([input,text])
     return response.text
- #PyPDF2
-def input_pdf_text(uploaded_file):
-    reader=pdf.PdfReader(uploaded_file)
-    text=""
-    for page in range(len(reader.pages)):
-        page=reader.pages[page]
-        text+=str(page.extract_text())
-    return text
 
 # NLP Models here 
 # Load models===========================================================================================================
@@ -267,12 +258,10 @@ def run():
                 else:
                     st.markdown('''<h4 style='text-align: left; color: #fabc10;'>[-] According to our recommendation please add Projects. It will show that you have done work related the required position or not.</h4>''',unsafe_allow_html=True)
                 insert_data(resume_data['name'], resume_data['email'], timestamp,str(resume_data['no_of_pages']), cand_level, str(resume_data['skills']),str(recommended_skills), str(rec_course))
-
+                #GEMINI
                 input_prompt="""Act as a Applicant Tracking System(ATS) with deep knowledge and expertise in Vast job fields. Analyse the entire Resume and give a brief summary of the candidate from the Resume"""
 
                 ## streamlit app
-                #uploaded_file=st.file_uploader("Upload Your Resume",type="pdf",help="Please upload the pdf")
-
                 submit = st.button("Summarize the Candidate")
                 if submit:
                         #if uploaded_file is not None:
