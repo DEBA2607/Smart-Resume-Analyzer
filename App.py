@@ -289,9 +289,6 @@ def run():
                 df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Timestamp', 'Total Page','User Level', 'Actual Skills', 'Recommended Skills','Recommended Course'])
                 st.dataframe(df)
                 st.markdown(get_table_download_link(df, 'User_Data.csv', 'Download Report'), unsafe_allow_html=True)
-                ## Admin Side Data
-                query = 'select * from user_data;'
-                plot_data = pd.read_sql(query, connection)
             else:
                 st.error("Wrong ID & Password Provided")
                 #GEMINI
