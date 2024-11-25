@@ -155,7 +155,9 @@ def run():
                 keywords = st_tags(label='### Skills that you have',
                                    text='See our skills recommendation',
                                    value=resume_data['skills'], key='10',maxtags= 15)
-
+                # Prediction 
+                st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
+                
                 ##  recommendation 
                 recommended_skills = []
                 rec_course = ''
@@ -164,7 +166,6 @@ def run():
                     ## Data science recommendation
                     if i.lower() in ds_keyword:
                         print(i.lower())
-                        st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
                         recommended_skills = ds_skills
                         st_tags(label='### Recommended skills for you.',text='Recommended skills generated from System',value=recommended_skills, key='2', maxtags=10)
                         st.markdown('''<h4 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job💼</h4>''',
@@ -175,7 +176,6 @@ def run():
                     ## Web development recommendation
                     elif i.lower() in web_keyword:
                         print(i.lower())
-                        st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
                         recommended_skills = web_skills
                         st_tags(label='### Recommended skills for you.',text='Recommended skills generated from System',value=recommended_skills, key='3', maxtags=10)
                         st.markdown('''<h4 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job💼</h4>''',unsafe_allow_html=True)
@@ -185,7 +185,6 @@ def run():
                     ## Android App Development
                     elif i.lower() in android_keyword:
                         print(i.lower())
-                        st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
                         recommended_skills = android_skills
                         st_tags(label='### Recommended skills for you.',text='Recommended skills generated from System',value=recommended_skills, key='4', maxtags=10)
                         st.markdown('''<h4 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job💼</h4>''',
@@ -196,7 +195,6 @@ def run():
                     ## IOS App Development
                     elif i.lower() in ios_keyword:
                         print(i.lower())
-                        st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
                         recommended_skills = ios_skills
                         st_tags(label='### Recommended skills for you.',text='Recommended skills generated from System',value=recommended_skills, key='5', maxtags=10)
                         st.markdown('''<h4 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job💼</h4>''',
@@ -207,7 +205,6 @@ def run():
                     ## Ui-UX Recommendation
                     elif i.lower() in uiux_keyword:
                         print(i.lower())
-                        st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
                         recommended_skills = uiux_skills
                         st_tags(label='### Recommended skills for you.',text='Recommended skills generated from System',value=recommended_skills, key='6', maxtags=10)
                         st.markdown('''<h4 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job💼</h4>''',
