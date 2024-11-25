@@ -29,8 +29,6 @@ def get_gemini_response(input,text):
 
 # NLP Models here 
 # Load models===========================================================================================================
-rf_classifier_categorization = pickle.load(open('models/rf_classifier_categorization.pkl', 'rb'))
-tfidf_vectorizer_categorization = pickle.load(open('models/tfidf_vectorizer_categorization.pkl', 'rb'))
 rf_classifier_job_recommendation = pickle.load(open('models/rf_classifier_job_recommendation.pkl', 'rb'))
 tfidf_vectorizer_job_recommendation = pickle.load(open('models/tfidf_vectorizer_job_recommendation.pkl', 'rb'))
 
@@ -45,12 +43,6 @@ def cleanResume(txt):
     cleanText = re.sub('\s+', ' ', cleanText)
     return cleanText
 
-# Prediction and Category Name
-def predict_category(resume_text):
-    resume_text = cleanResume(resume_text)
-    resume_tfidf = tfidf_vectorizer_categorization.transform([resume_text])
-    predicted_category = rf_classifier_categorization.predict(resume_tfidf)[0]
-    return predicted_category
 
 # Prediction and Category Name
 def job_recommendation(resume_text):
@@ -151,7 +143,6 @@ def run():
                
                 st.subheader("**Your Basic info**")
                 try:
-                    predicted_category = predict_category(resume_text)
                     recommended_job = job_recommendation(resume_text)
                     st.text('Resume pages: ' + str(resume_data['no_of_pages']))
                     st.text('Email: ' + resume_data['email'])
@@ -173,7 +164,6 @@ def run():
                     ## Data science recommendation
                     if i.lower() in ds_keyword:
                         print(i.lower())
-                        #st.success("The Category of Resume according to Analysis is " + predicted_category)
                         st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
                         recommended_skills = ds_skills
                         st_tags(label='### Recommended skills for you.',text='Recommended skills generated from System',value=recommended_skills, key='2', maxtags=10)
@@ -185,7 +175,6 @@ def run():
                     ## Web development recommendation
                     elif i.lower() in web_keyword:
                         print(i.lower())
-                        #st.success("The Category of Resume according to Analysis is " + predicted_category)
                         st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
                         recommended_skills = web_skills
                         st_tags(label='### Recommended skills for you.',text='Recommended skills generated from System',value=recommended_skills, key='3', maxtags=10)
@@ -196,7 +185,6 @@ def run():
                     ## Android App Development
                     elif i.lower() in android_keyword:
                         print(i.lower())
-                        #st.success("The Category of Resume according to Analysis is " + predicted_category)
                         st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
                         recommended_skills = android_skills
                         st_tags(label='### Recommended skills for you.',text='Recommended skills generated from System',value=recommended_skills, key='4', maxtags=10)
@@ -208,7 +196,6 @@ def run():
                     ## IOS App Development
                     elif i.lower() in ios_keyword:
                         print(i.lower())
-                        #st.success("The Category of Resume according to Analysis is " + predicted_category)
                         st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
                         recommended_skills = ios_skills
                         st_tags(label='### Recommended skills for you.',text='Recommended skills generated from System',value=recommended_skills, key='5', maxtags=10)
@@ -220,7 +207,6 @@ def run():
                     ## Ui-UX Recommendation
                     elif i.lower() in uiux_keyword:
                         print(i.lower())
-                        #st.success("The Category of Resume according to Analysis is " + predicted_category)
                         st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
                         recommended_skills = uiux_skills
                         st_tags(label='### Recommended skills for you.',text='Recommended skills generated from System',value=recommended_skills, key='6', maxtags=10)
@@ -258,6 +244,7 @@ def run():
                 else:
                     st.markdown('''<h4 style='text-align: left; color: #fabc10;'>[-] According to our recommendation please add Projects. It will show that you have done work related the required position or not.</h4>''',unsafe_allow_html=True)
                 insert_data(resume_data['name'], resume_data['email'], timestamp,str(resume_data['no_of_pages']), cand_level, str(resume_data['skills']),str(recommended_skills), str(rec_course))
+                
                 #GEMINI
                 input_prompt="""Act as a Applicant Tracking System(ATS) with deep knowledge and expertise in Vast job fields. Analyse the entire Resume and give a brief summary of the candidate from the Resume"""
 
@@ -268,11 +255,6 @@ def run():
                             text= resume_text
                             response=get_gemini_response(input_prompt,text)
                             st.subheader(response)
-                
-                
-
-
-
 
     else:
         ## Admin Side
