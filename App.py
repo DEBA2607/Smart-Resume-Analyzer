@@ -273,7 +273,7 @@ def run():
                 st.markdown(get_table_download_link(df, 'User_Data.csv', 'Download Report'), unsafe_allow_html=True)
             else:
                 st.error("Wrong ID & Password Provided")
-                #GEMINI
+                
 
 
 run()
