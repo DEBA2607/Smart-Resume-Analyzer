@@ -9,6 +9,8 @@ nlp = en_core_web_sm.load()
 import pandas as pd
 import base64, random
 import time, datetime
+import os
+from dotenv import load_dotenv
 from pyresparser import ResumeParser
 from pdfminer3.layout import LAParams
 from pdfminer3.pdfpage import PDFPage
@@ -21,7 +23,8 @@ import pymysql
 from Recommendor.Skills import ds_keyword,ds_skills, web_keyword, web_skills ,android_keyword, android_skills ,ios_keyword, ios_skills, uiux_keyword, uiux_skills
 from Recommendor.Courses import ds_course, web_course, android_course, ios_course, uiux_course, resume_videos, interview_videos
 #Genai API here 
-genai.configure(api_key="AIzaSyCaOX6r3hsdsEtIYZgq25eYjF_Q24Xfj-I")
+load_dotenv()
+genai.configure(api_key=os.getenv("API_KEY"))
 def get_gemini_response(input,text):
     model=genai.GenerativeModel('gemini-pro')
     response=model.generate_content([input,text])
