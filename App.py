@@ -254,7 +254,7 @@ def run():
                 #GEMINI
                 input_prompt1="""Act as a Applicant Tracking System(ATS) with deep knowledge and expertise in various job fields. Analyse the entire Resume and give a brief summary of the candidate from the Resume. Keep the Summary in Paragraph Format and within 100 to 150 words."""
 
-                input_prompt2 = """You are an skilled ATS (Applicant Tracking System) scanner with a deep understanding of data science and ATS functionality, your task is to evaluate the resume against the provided job description. give me the percentage of match if the resume matches the job description. First the output should come as percentage and then keywords missing and last final thoughts."""
+                input_prompt2 = """You are an skilled ATS (Applicant Tracking System) scanner with a deep understanding of various job fields and ATS functionality, your task is to evaluate the resume against the provided job description. First the output should come as Key skills missing and then last final thoughts."""
                 
                 
                 submit1 = st.button("Summarize the Candidate")
@@ -271,10 +271,13 @@ def run():
                 submit2 = st.button("Candidate Matching")
 
                 if submit2:
-                        #if uploaded_file is not None:
-                            text= resume_text
+                        if input_text == "":
+                            st.warning("Please provide Job Description")
+                        else: 
+                            text=resume_text
                             response2=get_gemini_response2(input_prompt2,text,input_text)
                             st.write(response2)
+                            
                             
 
 
