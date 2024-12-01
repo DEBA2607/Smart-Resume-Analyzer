@@ -22,12 +22,18 @@ from streamlit_tags import st_tags
 import pymysql
 from Recommendor.Skills import ds_keyword,ds_skills, web_keyword, web_skills ,android_keyword, android_skills ,ios_keyword, ios_skills, uiux_keyword, uiux_skills
 from Recommendor.Courses import ds_course, web_course, android_course, ios_course, uiux_course, resume_videos, interview_videos
+
 #Genai API here 
 load_dotenv()
 genai.configure(api_key=os.getenv("API_KEY"))
-def get_gemini_response(input,text):
+def get_gemini_response1(input_prompt,text):
     model=genai.GenerativeModel('gemini-pro')
-    response=model.generate_content([input,text])
+    response=model.generate_content([input_prompt,text])
+    return response.text
+
+def get_gemini_response2(input_prompt,text,input):
+    model=genai.GenerativeModel('gemini-pro')
+    response=model.generate_content([input_prompt,text,input])
     return response.text
 
 # NLP Models here 
@@ -246,15 +252,31 @@ def run():
                 insert_data(resume_data['name'], resume_data['email'], timestamp,str(resume_data['no_of_pages']), cand_level, str(resume_data['skills']),str(recommended_skills), str(rec_course))
                 
                 #GEMINI
-                input_prompt="""Act as a Applicant Tracking System(ATS) with deep knowledge and expertise in various job fields. Analyse the entire Resume and give a brief summary of the candidate from the Resume. Keep the Summary in Paragraph Format and within 100 to 150 words."""
+                input_prompt1="""Act as a Applicant Tracking System(ATS) with deep knowledge and expertise in various job fields. Analyse the entire Resume and give a brief summary of the candidate from the Resume. Keep the Summary in Paragraph Format and within 100 to 150 words."""
 
-                ## streamlit app
-                submit = st.button("Summarize the Candidate")
-                if submit:
+                input_prompt2 = """You are an skilled ATS (Applicant Tracking System) scanner with a deep understanding of data science and ATS functionality, your task is to evaluate the resume against the provided job description. give me the percentage of match if the resume matches the job description. First the output should come as percentage and then keywords missing and last final thoughts."""
+                
+                
+                submit1 = st.button("Summarize the Candidate")
+
+                if submit1:
                         #if uploaded_file is not None:
                             text= resume_text
-                            response=get_gemini_response(input_prompt,text)
-                            st.markdown(response)
+                            response1=get_gemini_response1(input_prompt1,text)
+                            st.subheader("Candidate Summary:")
+                            st.write(response1)
+
+                input_text=st.text_area("Job Description: ",key="input")
+
+                submit2 = st.button("Candidate Matching")
+
+                if submit2:
+                        #if uploaded_file is not None:
+                            text= resume_text
+                            response2=get_gemini_response2(input_prompt2,text,input_text)
+                            st.write(response2)
+                            
+
 
     else:
         ## Admin Side
