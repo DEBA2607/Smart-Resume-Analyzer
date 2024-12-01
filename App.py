@@ -277,10 +277,7 @@ def run():
                             text=resume_text
                             response2=get_gemini_response2(input_prompt2,text,input_text)
                             st.write(response2)
-                            
-                            
-
-
+                     
     else:
         ## Admin Side
         st.success('Welcome to Admin Side')
