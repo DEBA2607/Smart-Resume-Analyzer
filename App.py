@@ -246,7 +246,7 @@ def run():
                 insert_data(resume_data['name'], resume_data['email'], timestamp,str(resume_data['no_of_pages']), cand_level, str(resume_data['skills']),str(recommended_skills), str(rec_course))
                 
                 #GEMINI
-                input_prompt="""Act as a Applicant Tracking System(ATS) with deep knowledge and expertise in Vast job fields. Analyse the entire Resume and give a brief summary of the candidate from the Resume"""
+                input_prompt="""Act as a Applicant Tracking System(ATS) with deep knowledge and expertise in various job fields. Analyse the entire Resume and give a brief summary of the candidate from the Resume. Keep the Summary in Paragraph Format and within 100 to 150 words."""
 
                 ## streamlit app
                 submit = st.button("Summarize the Candidate")
@@ -254,7 +254,7 @@ def run():
                         #if uploaded_file is not None:
                             text= resume_text
                             response=get_gemini_response(input_prompt,text)
-                            st.subheader(response)
+                            st.markdown(response)
 
     else:
         ## Admin Side
