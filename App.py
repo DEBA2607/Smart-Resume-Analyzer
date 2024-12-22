@@ -24,6 +24,7 @@ from Recommendor.Skills import ds_keyword,ds_skills, web_keyword, web_skills ,an
 from Recommendor.Courses import ds_course, web_course, android_course, ios_course, uiux_course, resume_videos, interview_videos
 
 #Genai API here 
+
 load_dotenv()
 genai.configure(api_key=os.getenv("API_KEY"))
 def get_gemini_response1(input_prompt,text):
@@ -54,6 +55,7 @@ def cleanResume(txt):
 
 
 # Prediction and Category Name
+@st.cache_resource
 def job_recommendation(resume_text):
     resume_text= cleanResume(resume_text)
     resume_tfidf = tfidf_vectorizer_job_recommendation.transform([resume_text])
@@ -106,6 +108,7 @@ def course_recommender(course_list):
 connection = pymysql.connect(host='localhost', user='root', password='')
 cursor = connection.cursor()
 
+@st.cache_resource
 def insert_data(name, email, timestamp, no_of_pages, cand_level, skills, recommended_skills,
                 courses):
     DB_table_name = 'user_data'
@@ -127,6 +130,7 @@ def run():
     activities = ["User", "Admin"]
     choice = st.sidebar.selectbox("Choose among the given options:", activities)
 
+ 
     # Create the DB
     db_sql = """CREATE DATABASE IF NOT EXISTS SRA;"""
     cursor.execute(db_sql)
@@ -295,7 +299,5 @@ def run():
                 st.markdown(get_table_download_link(df, 'User_Data.csv', 'Download Report'), unsafe_allow_html=True)
             else:
                 st.error("Wrong ID & Password Provided")
-                
-
-
+        
 run()
