@@ -39,6 +39,8 @@ def get_gemini_response2(input_prompt,text,input):
 
 # NLP Models here 
 # Load models===========================================================================================================
+rf_classifier_categorization = pickle.load(open('models/rf_classifier_categorization.pkl', 'rb'))
+tfidf_vectorizer_categorization = pickle.load(open('models/tfidf_vectorizer_categorization.pkl', 'rb'))
 rf_classifier_job_recommendation = pickle.load(open('models/rf_classifier_job_recommendation.pkl', 'rb'))
 tfidf_vectorizer_job_recommendation = pickle.load(open('models/tfidf_vectorizer_job_recommendation.pkl', 'rb'))
 
@@ -56,6 +58,12 @@ def cleanResume(txt):
 
 # Prediction and Category Name
 @st.cache_resource
+def predict_category(resume_text):
+    resume_text = cleanResume(resume_text)
+    resume_tfidf = tfidf_vectorizer_categorization.transform([resume_text])
+    predicted_category = rf_classifier_categorization.predict(resume_tfidf)[0]
+    return predicted_category
+
 def job_recommendation(resume_text):
     resume_text= cleanResume(resume_text)
     resume_tfidf = tfidf_vectorizer_job_recommendation.transform([resume_text])
@@ -157,6 +165,7 @@ def run():
                 st.subheader("**Your Basic info**")
                 try:
                     recommended_job = job_recommendation(resume_text)
+                    predicted_category = predict_category(resume_text)
                     st.text('Resume pages: ' + str(resume_data['no_of_pages']))
                     st.text('Email: ' + resume_data['email'])
                     st.text('Contact: ' + resume_data['mobile_number'])
@@ -169,6 +178,7 @@ def run():
                                    text='See our skills recommendation',
                                    value=resume_data['skills'], key='10',maxtags= 15)
                 # Prediction 
+                st.success("The predicted category of the Resume is: " + predicted_category)
                 st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
                 
                 ##  recommendation 
