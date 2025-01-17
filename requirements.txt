@@ -6,5 +6,5 @@ pickle
 pymysql
 streamlit-tags
 google.generativeai
-pyhton-dotenv
+python-dotenv
 pandas
