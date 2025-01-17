@@ -6,6 +6,7 @@ import pandas as pd
 import base64, random
 import time, datetime
 import os
+import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 from pyresparser import ResumeParser
 from pdfminer3.layout import LAParams
@@ -302,6 +303,20 @@ def run():
                 st.header("**User's👨‍💻 Data**")
                 df = pd.DataFrame(data, columns=['ID', 'Type', 'Email', 'Timestamp', 'Total Page','User Level', 'Actual Skills', 'Recommended Skills','Recommended Course'])
                 st.dataframe(df)
+                skills_series = df['Actual Skills'].str.split(',').explode().str.strip()
+    
+                    # Count occurrences of each skill
+                skill_counts = skills_series.value_counts()
+    
+    # Create a bar chart
+                plt.figure(figsize=(12, 6))
+                skill_counts.plot(kind='bar', color='skyblue')
+                plt.title('Actual Skills Overview')
+                plt.xlabel('Skills')
+                plt.ylabel('Count')
+                plt.xticks(rotation=45, ha='right')
+                plt.tight_layout()
+                st.pyplot(plt)
                 st.markdown(get_table_download_link(df, 'User_Data.csv', 'Download Report'), unsafe_allow_html=True)
             else:
                 st.error("Wrong ID & Password Provided")
