@@ -2,10 +2,6 @@ import streamlit as st
 import re
 import pickle
 import google.generativeai as genai
-import nltk
-nltk.download('stopwords')
-import en_core_web_sm
-nlp = en_core_web_sm.load()
 import pandas as pd
 import base64, random
 import time, datetime
@@ -174,7 +170,7 @@ def run():
                 cand_level = ''
                 
                 ## Skills shown
-                keywords = st_tags(label='### Skills that you have',
+                st_tags(label='### Skills that you have',
                                    text='See our skills recommendation',
                                    value=resume_data['skills'], key='10',maxtags= 15)
                 # Prediction 
@@ -266,7 +262,7 @@ def run():
                 insert_data(resume_data['name'], resume_data['email'], timestamp,str(resume_data['no_of_pages']), cand_level, str(resume_data['skills']),str(recommended_skills), str(rec_course))
                 
                 #GEMINI
-                input_prompt1="""Act as a Applicant Tracking System(ATS) with deep knowledge and expertise in various job fields. Analyse the entire Resume and give a brief summary of the candidate from the Resume. Keep the Summary in Paragraph Format and within 100 to 150 words."""
+                input_prompt1="""Act as a Applicant Tracking System(ATS) with deep knowledge and expertise in various job fields. Analyse the entire Resume and give a brief summary of the candidate from the Resume. Give the Summary in points within 100 to 150 words."""
 
                 input_prompt2 = """You are an skilled ATS (Applicant Tracking System) scanner with a deep understanding of various job fields and ATS functionality, your task is to evaluate the resume against the provided job description. First the output should come as Key skills missing and then last final thoughts."""
                 
