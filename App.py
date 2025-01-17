@@ -116,7 +116,7 @@ cursor = connection.cursor()
 def insert_data(type, email, timestamp, no_of_pages, cand_level, skills, recommended_skills,
                 courses):
     DB_table_name = 'user_data'
-    insert_sql = "insert into " + DB_table_name + """
+    insert_sql = "insert IGNORE into " + DB_table_name + """
     values (0,%s,%s,%s,%s,%s,%s,%s,%s)"""
     rec_values = (
     type, email, timestamp, str(no_of_pages),cand_level, skills, recommended_skills,
@@ -142,7 +142,7 @@ def run():
 
     # Create table
     DB_table_name = 'user_data'
-    table_sql = "CREATE TABLE IF NOT EXISTS " + DB_table_name + """(ID INT NOT NULL AUTO_INCREMENT,Type varchar(100),Email_ID VARCHAR(50),Timestamp VARCHAR(50) NOT NULL,Page_no VARCHAR(5) NOT NULL,User_level VARCHAR(30) NOT NULL,Actual_skills VARCHAR(300) NOT NULL,Recommended_skills VARCHAR(300) NOT NULL,Recommended_courses VARCHAR(600) NOT NULL,PRIMARY KEY (ID));"""
+    table_sql = "CREATE TABLE IF NOT EXISTS " + DB_table_name + """(ID INT NOT NULL AUTO_INCREMENT,Type varchar(100),Email_ID VARCHAR(50),Timestamp VARCHAR(50) NOT NULL,Page_no VARCHAR(5) NOT NULL,User_level VARCHAR(30) NOT NULL,Actual_skills VARCHAR(300) NOT NULL,Recommended_skills VARCHAR(300) NOT NULL,Recommended_courses VARCHAR(600) NOT NULL,PRIMARY KEY (ID),UNIQUE(Email_ID));"""
     cursor.execute(table_sql)
     if choice == 'User':
         pdf_file = st.file_uploader("Choose your Resume", type=["pdf"])
