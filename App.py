@@ -17,7 +17,7 @@ import io, random
 from streamlit_tags import st_tags
 import pymysql
 from Recommendor.Skills import ds_keyword,ds_skills, web_keyword, web_skills ,android_keyword, android_skills ,ios_keyword, ios_skills, uiux_keyword, uiux_skills
-from Recommendor.Courses import ds_course, web_course, android_course, ios_course, uiux_course, resume_videos, interview_videos
+from Recommendor.Courses import ds_course, web_course, android_course, ios_course, uiux_course
 
 #Genai API here 
 
