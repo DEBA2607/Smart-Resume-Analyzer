@@ -305,10 +305,10 @@ def run():
                 st.dataframe(df)
                 skills_series = df['Actual Skills'].str.split(',').explode().str.strip()
     
-                    # Count occurrences of each skill
+                # Count occurrences of each skill
                 skill_counts = skills_series.value_counts()
     
-    # Create a bar chart
+                # Create a bar chart
                 plt.figure(figsize=(12, 6))
                 skill_counts.plot(kind='bar', color='skyblue')
                 plt.title('Actual Skills Overview')
