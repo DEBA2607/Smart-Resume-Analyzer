@@ -1,16 +1,15 @@
 import streamlit as st
 import re
 import pickle
-import nltk
-nltk.download('stopwords')
 import google.generativeai as genai
 import pandas as pd
 import base64, random
 import time, datetime
 import os
+import json
+from PyPDF2 import PdfReader
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
-from pyresparser import ResumeParser
 from pdfminer3.layout import LAParams
 from pdfminer3.pdfpage import PDFPage
 from pdfminer3.pdfinterp import PDFResourceManager
@@ -86,7 +85,6 @@ def pdf_reader(file):
             page_interpreter.process_page(page)
             print(page)
         text = fake_file_handle.getvalue()
-
     # close open handles
     converter.close()
     fake_file_handle.close()
@@ -96,7 +94,96 @@ def show_pdf(file_path):
     with open(file_path, "rb") as f:
         base64_pdf = base64.b64encode(f.read()).decode('utf-8')
     pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
-    st.markdown(pdf_display, unsafe_allow_html=True)       
+    st.markdown(pdf_display, unsafe_allow_html=True) 
+
+
+def extract_resume_data_with_gemini(pdf_path):
+    # Read PDF
+    reader = PdfReader(pdf_path)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text()
+    
+    # Modified prompt to explicitly request valid JSON format
+    prompt5 = """
+    You are a resume parsing assistant. Extract the following information from the resume text below:
+    1. Name of the person
+    2. Email address
+    3. Phone/mobile number
+    4. List of skills (technical, professional, etc.)
+    
+    VERY IMPORTANT: Return your answer ONLY as a valid JSON object with these exact keys: name, email, mobile_number, skills (as an array).
+    Format your response as valid, parseable JSON with no other text before or after. Ensure all quotes are properly escaped.
+    Example of expected response format:
+    {"name": "John Doe", "email": "john@example.com", "mobile_number": "1234567890", "skills": ["Python", "Machine Learning"]}
+    
+    RESUME TEXT:
+    """
+    
+    # Call your existing Gemini function
+    response = get_gemini_response1(prompt5, text)
+    
+    # Log the raw response for debugging
+    try:
+        # Attempt to extract just the JSON part if there's additional text
+        # Look for patterns that might indicate JSON content
+        json_pattern = r'({.*})'
+        json_match = re.search(json_pattern, response, re.DOTALL)
+        
+        if json_match:
+            json_str = json_match.group(1)
+            # Parse JSON from the response
+            data = json.loads(json_str)
+        else:
+            # If no JSON pattern found, try the whole response
+            data = json.loads(response)
+            
+        # Add page count
+        data["no_of_pages"] = len(reader.pages)
+        return data
+        
+    except json.JSONDecodeError as e:
+        # Improved error handling with more details
+        st.error(f"Failed to parse JSON response: {str(e)}")
+        
+        # Create a fallback structured response based on regex patterns
+        name_pattern = r'[nN]ame[\"\':\s]+([^\"\'}\n,]+)'
+        email_pattern = r'[eE]mail[\"\':\s]+([^\"\'}\n,]+)'
+        phone_pattern = r'([pP]hone|[mM]obile)[\"\':_\s]+([^\"\'}\n,]+)'
+        skills_pattern = r'[sS]kills[\"\':]\s*\[(.*?)\]'
+        
+        name_match = re.search(name_pattern, response)
+        email_match = re.search(email_pattern, response)
+        phone_match = re.search(phone_pattern, response)
+        skills_match = re.search(skills_pattern, response, re.DOTALL)
+        
+        name = name_match.group(1).strip() if name_match else ""
+        email = email_match.group(1).strip() if email_match else ""
+        mobile_number = phone_match.group(2).strip() if phone_match else ""
+        
+        skills = []
+        if skills_match:
+            skills_text = skills_match.group(1)
+            # Extract skills from the array text
+            skills = [s.strip().strip('"\'') for s in re.findall(r'["\']([^"\']+)["\']', skills_text)]
+        
+        # Fallback data
+        fallback_data = {
+            "name": name,
+            "email": email, 
+            "mobile_number": mobile_number,
+            "skills": skills,
+            "no_of_pages": len(reader.pages)
+        }
+        
+        st.write(fallback_data)
+        return fallback_data   
+
+def reset_session_state():
+    """Reset relevant session state variables when a new PDF is uploaded"""
+    for key in ['skills', 'recommended_skills', 'courses']:
+        if key in st.session_state:
+            del st.session_state[key]
 
 def course_recommender(course_list):
     st.subheader("**Courses & Certificates Recommendations**")
@@ -131,6 +218,7 @@ st.set_page_config(
     page_title="Smart Resume Analyzer",
 )
 
+
 def run():
     st.title("Smart Resume Analyser")
     st.sidebar.markdown("# Choose User")
@@ -147,14 +235,26 @@ def run():
     DB_table_name = 'user_data'
     table_sql = "CREATE TABLE IF NOT EXISTS " + DB_table_name + """(ID INT NOT NULL AUTO_INCREMENT,Type varchar(100),Email_ID VARCHAR(50),Timestamp VARCHAR(50) NOT NULL,Page_no VARCHAR(5) NOT NULL,User_level VARCHAR(30) NOT NULL,Actual_skills VARCHAR(300) NOT NULL,Recommended_skills VARCHAR(300) NOT NULL,Recommended_courses VARCHAR(600) NOT NULL,PRIMARY KEY (ID),UNIQUE(Email_ID));"""
     cursor.execute(table_sql)
+
     if choice == 'User':
+        if 'current_pdf' not in st.session_state:
+            st.session_state.current_pdf = None
+
         pdf_file = st.file_uploader("Choose your Resume", type=["pdf"])
         if pdf_file is not None:
+            if st.session_state.current_pdf != pdf_file.name:
+                # Reset session state for a new PDF
+                reset_session_state()
+                st.session_state.current_pdf = pdf_file.name
             save_image_path = './Uploaded_Resumes/' + pdf_file.name
             with open(save_image_path, "wb") as f:
                 f.write(pdf_file.getbuffer())
             show_pdf(save_image_path)
-            resume_data = ResumeParser(save_image_path).get_extracted_data()
+
+            #resume_data = ResumeParser(save_image_path).get_extracted_data()
+
+            resume_data = extract_resume_data_with_gemini(save_image_path)
+
             if resume_data:
                 ## Get the whole resume data
                 resume_text = pdf_reader(save_image_path)
@@ -171,11 +271,15 @@ def run():
                 except:
                     pass
                 cand_level = ''
+
+                if 'skills' not in st.session_state:
+                    st.session_state.skills = resume_data['skills']
                 
                 ## Skills shown
-                st_tags(label='### Skills that you have',
-                                   text='See our skills recommendation',
-                                   value=resume_data['skills'], key='10',maxtags= 15)
+                skills_key = f"skills_{st.session_state.current_pdf}"
+                st_tags(label='### Skills that you have',text='See our skills recommendation',value=st.session_state.skills, 
+                       key=skills_key,maxtags= 15)
+
                 # Prediction 
                 st.success("The predicted category of the Resume is: " + predicted_category)
                 st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + recommended_job)
