@@ -10,3 +10,4 @@ scikit-learn
 streamlit-tags
 google.generativeai
 python-dotenv
+PyPDF2
