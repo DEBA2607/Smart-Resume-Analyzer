@@ -2,7 +2,6 @@ pdfminer3
 pyresparser
 streamlit
 pandas
-pickle
 pymysql
 streamlit-tags
 google.generativeai
