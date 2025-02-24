@@ -4,6 +4,7 @@ pyresparser
 streamlit
 pandas
 pymysql
+scikit-learn
 streamlit-tags
 google.generativeai
 python-dotenv
