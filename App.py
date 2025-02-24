@@ -139,9 +139,9 @@ def run():
 
  
     # Create the DB
-    db_sql = """CREATE DATABASE IF NOT EXISTS SRA;"""
+    db_sql = """CREATE DATABASE IF NOT EXISTS sql12764371;"""
     cursor.execute(db_sql)
-    connection.select_db("sra")
+    connection.select_db("sql12764371")
 
     # Create table
     DB_table_name = 'user_data'
