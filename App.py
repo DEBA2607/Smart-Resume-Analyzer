@@ -112,7 +112,7 @@ def course_recommender(course_list):
             break
     return rec_course
 
-connection = pymysql.connect(host='127.0.0.1', user='root', password='Deba2607', port=3306)
+connection = pymysql.connect(host='sql12.freesqldatabase.com', user='sql12764371', password='jbzlL1VwJz', port=3306)
 cursor = connection.cursor()
 
 @st.cache_resource
