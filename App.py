@@ -1,6 +1,8 @@
 import streamlit as st
 import re
 import pickle
+import nltk
+nltk.download('stopwords')
 import google.generativeai as genai
 import pandas as pd
 import base64, random
