@@ -23,7 +23,6 @@ def load_expensive_libraries():
     from pdfminer3.pdfinterp import PDFResourceManager
     from pdfminer3.pdfinterp import PDFPageInterpreter
     from pdfminer3.converter import TextConverter
-    from dotenv import load_dotenv
     
     # Load environment variables
     #load_dotenv()
