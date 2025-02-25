@@ -72,7 +72,7 @@ def get_database_connection():
 def get_gemini_response1(input_prompt, text):
     libs = load_expensive_libraries()
     genai = libs['genai']
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-2.0-flash')
     response = model.generate_content([input_prompt, text])
     return response.text
 
@@ -80,7 +80,7 @@ def get_gemini_response1(input_prompt, text):
 def get_gemini_response2(input_prompt, text, input):
     libs = load_expensive_libraries()
     genai = libs['genai']
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-2.0-flash')
     response = model.generate_content([input_prompt, text, input])
     return response.text
 
@@ -263,8 +263,9 @@ def extract_resume_data_with_gemini(pdf_path):
 
 
 def reset_session_state():
-    """Reset relevant session state variables when a new PDF is uploaded"""
-    for key in ['skills', 'recommended_skills', 'courses']:
+    """Reset all relevant session state variables when a new PDF is uploaded"""
+    keys_to_reset = ['skills', 'recommended_skills', 'courses', 'resume_data', 'resume_text', 'recommended_job', 'predicted_category'] # Add all PDF-dependent keys here
+    for key in keys_to_reset:
         if key in st.session_state:
             del st.session_state[key]
 
