@@ -24,9 +24,6 @@ def load_expensive_libraries():
     from pdfminer3.pdfinterp import PDFPageInterpreter
     from pdfminer3.converter import TextConverter
     
-    # Load environment variables
-    #load_dotenv()
-    
     # Configure Gemini API
     genai.configure(api_key=st.secrets["API_KEY"])
 
