@@ -1,0 +1,2 @@
+Error calling Gemini API: 400 The input token count (33179) exceeds the maximum number of tokens allowed (30720).
+No response received from Gemini API.

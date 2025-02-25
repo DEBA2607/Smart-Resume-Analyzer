@@ -7,6 +7,7 @@ import time, datetime
 import os
 import json
 import io
+import traceback
 from streamlit_tags import st_tags
 import pymysql
 import random
@@ -140,82 +141,130 @@ def show_pdf(file_path):
 
 @st.cache_data(ttl=3600)  # Cache for 1 hour
 def extract_resume_data_with_gemini(pdf_path):
-    libs = load_expensive_libraries()
-    PdfReader = libs['PdfReader']
-    
-    # Read PDF
-    reader = PdfReader(pdf_path)
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text()
-    
-    # Modified prompt to explicitly request valid JSON format
-    prompt5 = """
-    You are a resume parsing assistant. Extract the following information from the resume text below:
-    1. Name of the person
-    2. Email address
-    3. Phone/mobile number
-    4. List of skills (technical, professional, etc.)
-    
-    VERY IMPORTANT: Return your answer ONLY as a valid JSON object with these exact keys: name, email, mobile_number, skills (as an array).
-    Format your response as valid, parseable JSON with no other text before or after. Ensure all quotes are properly escaped.
-    Example of expected response format:
-    {"name": "John Doe", "email": "john@example.com", "mobile_number": "1234567890", "skills": ["Python", "Machine Learning"]}
-    
-    RESUME TEXT:
-    """
-    
-    # Call your existing Gemini function
-    response = get_gemini_response1(prompt5, text)
-    
     try:
-        # Attempt to extract just the JSON part if there's additional text
-        json_pattern = r'({.*})'
-        json_match = re.search(json_pattern, response, re.DOTALL)
+        libs = load_expensive_libraries()
+        PdfReader = libs['PdfReader']
         
-        if json_match:
-            json_str = json_match.group(1)
-            data = json.loads(json_str)
-        else:
-            data = json.loads(response)
+        # Read PDF
+        reader = PdfReader(pdf_path)
+        text = ""
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text is not None:
+                text += page_text
+        
+        # Modified prompt to explicitly request valid JSON format
+        prompt5 = """
+        You are a resume parsing assistant. Extract the following information from the resume text below:
+        1. Name of the person
+        2. Email address
+        3. Phone/mobile number
+        4. List of skills (technical, professional, etc.)
+        
+        VERY IMPORTANT: Return your answer ONLY as a valid JSON object with these exact keys: name, email, mobile_number, skills (as an array).
+        Format your response as valid, parseable JSON with no other text before or after. Ensure all quotes are properly escaped.
+        Example of expected response format:
+        {"name": "John Doe", "email": "john@example.com", "mobile_number": "1234567890", "skills": ["Python", "Machine Learning"]}
+        
+        RESUME TEXT:
+        """
+        
+        # Ensure text is a string
+        if text is None:
+            text = "No text extracted."
             
-        # Add page count
-        data["no_of_pages"] = len(reader.pages)
-        return data
+        prompt5 += text
         
-    except json.JSONDecodeError as e:
-        st.error(f"Failed to parse JSON response: {str(e)}")
+        # Call your existing Gemini function with error handling
+        try:
+            response = get_gemini_response1(prompt5, text)
+        except Exception as e:
+            print(f"Error calling Gemini API: {str(e)}", file=open("error.log", "a"))
+            response = None
         
-        # Create a fallback structured response based on regex patterns
-        name_pattern = r'[nN]ame[\"\':\s]+([^\"\'}\n,]+)'
-        email_pattern = r'[eE]mail[\"\':\s]+([^\"\'}\n,]+)'
-        phone_pattern = r'([pP]hone|[mM]obile)[\"\':_\s]+([^\"\'}\n,]+)'
-        skills_pattern = r'[sS]kills[\"\':]\s*\[(.*?)\]'
+        # Process response
+        if response is not None:
+            try:
+                # Attempt to extract just the JSON part if there's additional text
+                json_pattern = r'({.*})'
+                json_match = re.search(json_pattern, response, re.DOTALL)
+                
+                if json_match:
+                    json_str = json_match.group(1)
+                    data = json.loads(json_str)
+                else:
+                    data = json.loads(response)
+                    
+                # Add page count
+                data["no_of_pages"] = len(reader.pages)
+                return data
+                
+            except json.JSONDecodeError as e:
+                # Log the error and response for debugging
+                with open("error.log", "a") as f:
+                    f.write(f"Failed to parse JSON response: {str(e)}\n")
+                    f.write(f"Response: {response}\n")
+                
+                # Create a fallback structured response based on regex patterns
+                name_pattern = r'[nN]ame[\"\':\s]+([^\"\'}\n,]+)'
+                email_pattern = r'[eE]mail[\"\':\s]+([^\s,]+)'
+                phone_pattern = r'(?:[pP]hone|[mM]obile)[\"\':_\s]+([\d\s+-]+)'
+                skills_pattern = r'[sS]kills[\"\':]\s*\[(.*?)\]'
+                
+                name_match = re.search(name_pattern, response)
+                email_match = re.search(email_pattern, response)
+                phone_match = re.search(phone_pattern, response)
+                skills_match = re.search(skills_pattern, response, re.DOTALL)
+                
+                name = name_match.group(1).strip() if name_match and name_match.group(1) else ""
+                email = email_match.group(1).strip() if email_match and email_match.group(1) else ""
+                mobile_number = phone_match.group(1).strip() if phone_match and phone_match.group(1) else ""
+                
+                skills = []
+                if skills_match:
+                    skills_text = skills_match.group(1)
+                    skills = [s.strip().strip('"\'') for s in re.findall(r'["\']([^"\']+)["\']', skills_text)]
+                
+                # Fallback data
+                fallback_data = {
+                    "name": name,
+                    "email": email, 
+                    "mobile_number": mobile_number,
+                    "skills": skills,
+                    "no_of_pages": len(reader.pages)
+                }
+                
+                return fallback_data
         
-        name_match = re.search(name_pattern, response)
-        email_match = re.search(email_pattern, response)
-        phone_match = re.search(phone_pattern, response)
-        skills_match = re.search(skills_pattern, response, re.DOTALL)
+        # Handle None response
+        with open("error.log", "a") as f:
+            f.write("No response received from Gemini API.\n")
         
-        name = name_match.group(1).strip() if name_match else ""
-        email = email_match.group(1).strip() if email_match else ""
-        mobile_number = phone_match.group(2).strip() if phone_match else ""
-        
-        skills = []
-        if skills_match:
-            skills_text = skills_match.group(1)
-            skills = [s.strip().strip('"\'') for s in re.findall(r'["\']([^"\']+)["\']', skills_text)]
-        
-        # Fallback data
+        # Fallback data when no response is received
         fallback_data = {
-            "name": name,
-            "email": email, 
-            "mobile_number": mobile_number,
-            "skills": skills,
+            "name": "",
+            "email": "", 
+            "mobile_number": "",
+            "skills": [],
             "no_of_pages": len(reader.pages)
         }
         
         return fallback_data
+        
+    except Exception as e:
+        # Catch any other exceptions
+        with open("error.log", "a") as f:
+            f.write(f"Unexpected error in extract_resume_data_with_gemini: {str(e)}\n")
+        
+        # Return empty data on error
+        return {
+            "name": "",
+            "email": "", 
+            "mobile_number": "",
+            "skills": [],
+            "no_of_pages": 0
+        }
+
 
 def reset_session_state():
     """Reset relevant session state variables when a new PDF is uploaded"""
