@@ -1,2 +1,11 @@
 Error calling Gemini API: 400 The input token count (33179) exceeds the maximum number of tokens allowed (30720).
 No response received from Gemini API.
+Unexpected error in extract_resume_data_with_gemini: 'NameObject' object has no attribute 'extract_text'
+Error calling Gemini API: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+No response received from Gemini API.
+Error calling Gemini API: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+No response received from Gemini API.
+Error calling Gemini API: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+No response received from Gemini API.
+Error calling Gemini API: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+No response received from Gemini API.

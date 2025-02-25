@@ -141,8 +141,10 @@ def extract_resume_data_with_gemini(pdf_path):
         
         # Read PDF
         reader = PdfReader(pdf_path)
+        max_pages = min(3, len(reader.pages))  # Limit to first 5 pages for performance
         text = ""
-        for page in reader.pages:
+        for i in range(max_pages):
+            page = reader.pages[i]
             page_text = page.extract_text()
             if page_text is not None:
                 text += page_text
@@ -155,7 +157,7 @@ def extract_resume_data_with_gemini(pdf_path):
         3. Phone/mobile number
         4. List of skills (technical, professional, etc.)
         
-        VERY IMPORTANT: Return your answer ONLY as a valid JSON object with these exact keys: name, email, mobile_number, skills (as an array).
+        VERY IMPORTANT: Return your answer ONLY as a valid JSON object with these exact keys: name, email, mobile_number, skills (as an array). Try to limit single skill to at most 3 words. Extract skills from at most 5 pages of the resume. Return at most 10 skills.
         Format your response as valid, parseable JSON with no other text before or after. Ensure all quotes are properly escaped.
         Example of expected response format:
         {"name": "John Doe", "email": "john@example.com", "mobile_number": "1234567890", "skills": ["Python", "Machine Learning"]}
@@ -392,9 +394,12 @@ def run():
                                     st.session_state.recommended_job = job_recommendation(st.session_state.resume_text)
                                     st.session_state.predicted_category = predict_category(st.session_state.resume_text)
                             
-                            st.text('Resume pages: ' + str(st.session_state.resume_data['no_of_pages']))
-                            st.text('Email: ' + st.session_state.resume_data['email'])
-                            st.text('Contact: ' + st.session_state.resume_data['mobile_number'])
+                            pages = st.session_state.resume_data.get('no_of_pages', 'N/A')
+                            email = st.session_state.resume_data.get('email', 'N/A')
+                            mobile = st.session_state.resume_data.get('mobile_number', 'N/A')
+                            st.text(f'Resume pages: {pages}')
+                            st.text(f'Email: {email}')
+                            st.text(f'Mobile: {mobile}')
                         except Exception as e:
                             st.error(f"Error processing resume info: {str(e)}")
                         
