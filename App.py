@@ -4,10 +4,7 @@ import pickle
 import pandas as pd
 import base64
 import time, datetime
-import os
 import json
-import io
-import traceback
 from streamlit_tags import st_tags
 import pymysql
 import random
@@ -29,10 +26,11 @@ def load_expensive_libraries():
     from dotenv import load_dotenv
     
     # Load environment variables
-    load_dotenv()
+    #load_dotenv()
     
     # Configure Gemini API
-    genai.configure(api_key=os.getenv("API_KEY"))
+    genai.configure(api_key=st.secrets["API_KEY"])
+
     
     return {
         'genai': genai,
@@ -65,10 +63,10 @@ def load_ml_models():
 def get_database_connection():
     """Get database connection with connection pooling"""
     connection = pymysql.connect(
-        host='sql12.freesqldatabase.com',
-        user='sql12764371',
-        password='jbzlL1VwJz',
-        port=3306,
+        host=st.secrets["DB_HOST"],
+        user=st.secrets["DB_USER"],
+        password=st.secrets["DB_PASSWORD"],
+        port=st.secrets["DB_PORT"],
         cursorclass=pymysql.cursors.DictCursor
     )
     return connection
