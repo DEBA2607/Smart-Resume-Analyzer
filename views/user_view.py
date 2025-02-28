@@ -149,15 +149,16 @@ def save_to_database(cand_level):
     cur_time = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
     timestamp = str(cur_date + '_' + cur_time)
     
+    # Call the insert_data function with the correct parameter names
     insert_data(
-        st.session_state.resume_data['name'],
-        st.session_state.resume_data['email'],
+        st.session_state.resume_data.get('name', 'Unknown'),
+        st.session_state.resume_data.get('email', 'N/A'),
         timestamp,
-        str(st.session_state.resume_data['no_of_pages']),
+        str(st.session_state.resume_data.get('no_of_pages', '0')),
         cand_level,
-        str(st.session_state.resume_data['skills']),
-        str(st.session_state.recommended_skills),
-        str(st.session_state.rec_course)
+        str(st.session_state.resume_data.get('skills', [])),
+        str(st.session_state.recommended_skills if 'recommended_skills' in st.session_state else []),
+        str(st.session_state.rec_course if 'rec_course' in st.session_state else '')
     )
 
 def display_resume_tips():
