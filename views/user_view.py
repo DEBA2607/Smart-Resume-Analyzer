@@ -8,6 +8,8 @@ from utils.database import insert_data
 from services.ml_service import predict_category, job_recommendation
 from services.recommendation_service import load_recommendation_data, course_recommender
 from services.ai_service import get_gemini_response1, get_gemini_response2
+from services.ai_service import extract_location_from_resume
+from services.job_search_service import find_jobs_by_location,search_jobs_by_country,test_adzuna_api ,display_job_results
 
 def render_user_view():
     """Render the user view of the application"""
@@ -58,6 +60,9 @@ def display_resume_analysis(save_image_path):
     
     # Display AI analysis
     display_ai_analysis()
+
+    st.header("Job Search")
+    display_job_search()
 
 def display_basic_info():
     """Display basic information extracted from the resume"""
@@ -222,3 +227,77 @@ def display_ai_analysis():
                         st.session_state[match_key] = get_gemini_response2(input_prompt2, text, input_text)
                     
                     st.write(st.session_state[match_key])
+
+def display_job_search():
+    """Display job search based on location"""
+    st.subheader("**Job Opportunities**")
+    
+    # Initialize session state variables if they don't exist
+    if 'job_search_initiated' not in st.session_state:
+        st.session_state.job_search_initiated = False
+    if 'location_data' not in st.session_state:
+        st.session_state.location_data = None
+    if 'country_selected' not in st.session_state:
+        st.session_state.country_selected = False
+        
+    # Step 1: Initial job search button
+    if not st.session_state.job_search_initiated:
+        if st.button("Find Relevant Jobs"):
+            st.session_state.job_search_initiated = True
+            
+            # Clear previous job results to ensure refresh
+            if 'job_results' in st.session_state:
+                del st.session_state['job_results']
+                
+            with st.spinner("Extracting location from resume..."):
+                # Extract location data from resume
+                st.session_state.location_data = extract_location_from_resume(st.session_state.resume_text)
+            
+            # Force rerun to show next steps
+            st.rerun()
+    
+    # Step 2: After initiating job search, show location info and country selection if needed
+    if st.session_state.job_search_initiated:
+        location_data = st.session_state.location_data
+        
+        # If location was found, show it
+        if location_data and any(v for k, v in location_data.items() 
+                        if k not in ["location_found", "error"] and v):
+            location_str = ", ".join([v for k, v in location_data.items() 
+                                     if k not in ["location_found", "error"] and v])
+            st.success(f"Detected location: {location_str}")
+            
+            # Search jobs directly with the found location
+            with st.spinner("Searching for job openings..."):
+                job_results = find_jobs_by_location(
+                    location_data, 
+                    job_title=st.session_state.get('recommended_job')
+                )
+                if job_results:
+                    st.session_state['job_results'] = job_results
+        else:
+            # No location found, offer country selection
+            st.warning("No location detected in resume. Please select a country.")
+            
+            country_options = ["United States", "United Kingdom", "Canada", "Australia", 
+                               "Germany", "France", "Italy", "Spain", "Netherlands", "India"]
+            
+            selected_country = st.selectbox(
+                "Select country for job search:",
+                country_options,
+                key="country_dropdown"
+            )
+            
+            # Add country search button
+            if st.button("Search Jobs in Selected Country"):
+                with st.spinner(f"Searching for jobs in {selected_country}..."):
+                    job_results = search_jobs_by_country(selected_country, 
+                                                     job_title=st.session_state.get('recommended_job'))
+                    if job_results:
+                        st.session_state['job_results'] = job_results
+                        st.session_state.country_selected = True
+    
+    # Display job results if they exist in session state
+    if 'job_results' in st.session_state and st.session_state['job_results']:
+        display_job_results(st.session_state['job_results'])
+        
