@@ -10,8 +10,8 @@ def reset_session_state():
         del st.session_state.resume_data
     if 'resume_text' in st.session_state:
         del st.session_state.resume_text
-    if 'predicted_category' in st.session_state:
-        del st.session_state.predicted_category
+    # if 'predicted_category' in st.session_state:
+    #     del st.session_state.predicted_category
     if 'recommended_job' in st.session_state:
         del st.session_state.recommended_job
     if 'recommended_skills' in st.session_state:
