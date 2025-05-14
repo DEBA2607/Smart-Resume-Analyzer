@@ -5,7 +5,7 @@ from streamlit_tags import st_tags
 from utils.pdf_utils import pdf_reader, show_pdf, extract_resume_data_with_gemini
 from utils.session_state import reset_session_state
 from utils.database import insert_data
-from services.ml_service import job_recommendation #predict_category
+from services.ml_service import predict_category, job_recommendation
 from services.recommendation_service import load_recommendation_data, course_recommender
 from services.ai_service import get_gemini_response1, get_gemini_response2
 from services.ai_service import extract_location_from_resume
@@ -72,7 +72,7 @@ def display_basic_info():
             if 'recommended_job' not in st.session_state:
                 with st.spinner("Analyzing resume..."):
                     st.session_state.recommended_job = job_recommendation(st.session_state.resume_text)
-                    # st.session_state.predicted_category = predict_category(st.session_state.resume_text)
+                    st.session_state.predicted_category = predict_category(st.session_state.resume_text)
 
             pages = st.session_state.resume_data.get('no_of_pages', 'N/A')
             email = st.session_state.resume_data.get('email', 'N/A')
@@ -95,7 +95,7 @@ def display_skills_and_recommendations():
     st_tags(label='### Skills that you have', text='See our skills recommendation',
             value=st.session_state.skills, key=skills_key, maxtags=15)
 
-    # st.success("The predicted category of the Resume is: " + st.session_state.predicted_category)
+    st.success("The predicted category of the Resume is: " + st.session_state.predicted_category)
     st.success("According to our Analysis, this Resume is suited for the aforementioned job: " + st.session_state.recommended_job)
 
     if 'recommended_skills' not in st.session_state:
