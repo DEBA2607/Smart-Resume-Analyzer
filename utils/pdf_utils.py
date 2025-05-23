@@ -5,14 +5,12 @@ import re
 import json
 from utils.gemini_utils import get_gemini_response1 # Correct relative import
 
-# Lazy-load expensive libraries within the functions that use them
-# No need to import PdfReader, etc., at the top of the file
 
 @st.cache_data
 def pdf_reader(file):
     """Extract text from PDF using PdfReader."""
     try:
-        from PyPDF2 import PdfReader  # Lazy import
+        from PyPDF2 import PdfReader 
         reader = PdfReader(file)
         text = ""
         for page in reader.pages:
