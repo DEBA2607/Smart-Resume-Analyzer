@@ -204,11 +204,13 @@ def display_ai_analysis():
                 text = st.session_state.resume_text
                 
                 # Use session state to cache response
-                if 'summary_response' not in st.session_state:
-                    st.session_state.summary_response = get_gemini_response1(input_prompt1, text)
+                summary_key = f"summary_{hash(text)}"
+                # Use session state to cache response with unique key
+                if summary_key not in st.session_state:
+                    st.session_state[summary_key] = get_gemini_response1(input_prompt1, text)
                 
                 st.subheader("Candidate Summary:")
-                st.write(st.session_state.summary_response)
+                st.write(st.session_state[summary_key])
     
     with col2:
         input_text = st.text_area("Job Description: ", key="input")
