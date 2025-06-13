@@ -200,7 +200,23 @@ def display_ai_analysis():
     with col1:
         if st.button("Summarize the Candidate", key="summarize_btn"):
             with st.spinner("Generating summary..."):
-                input_prompt1 = """Act as a Applicant Tracking System(ATS) with deep knowledge and expertise in various job fields. Analyse the entire Resume and give a brief summary of the candidate from the Resume. Give the Summary in points within 100 to 150 words."""
+                input_prompt1 = """
+You are an expert Applicant Tracking System (ATS) with deep knowledge in various job fields. 
+
+I will provide you with a resume text below. Please analyze the entire resume content and generate a comprehensive candidate summary.
+
+Requirements:
+- Provide a brief summary of the candidate based on the resume content
+- Present the summary in bullet points format
+- Keep the summary between 100-150 words
+- Focus on key qualifications, experience, skills, and strengths
+- Highlight the candidate's professional background and potential value
+
+Resume Text:
+{resume_text}
+
+Please provide your analysis as a candidate summary in bullet points.
+"""
                 text = st.session_state.resume_text
                 
                 # Use session state to cache response
